@@ -140,27 +140,3 @@ architecture-beta
 Three things are deliberately glossed over: how data ends up on those nodes, how the Spark program is split across them, and what happens when one of them fails. We will spend most of the rest of the course unpacking each — the cluster filesystem (HDFS, Lecture 3), the parallel programming model (MapReduce, Lecture 4; Spark, Lecture 5), and the alternative stores that sit behind the same shape (NoSQL, lakehouse formats, later in the semester).
 
 For now, the picture is enough: when one machine cannot do the job, we move to many — and that creates a new set of problems we'll spend the semester solving.
-
-## 7. What's coming next
-
-In **Lecture 2** we will pick up here and ask: *given that we want to run computation across many machines, what makes that hard, and how does Hadoop answer those problems?* We'll meet three failure modes specific to distributed compute, and three corresponding ideas (divide-and-conquer, data locality, fault-tolerant frameworks) that Hadoop introduced.
-
-## Lab / Assignment
-
-No assignment for this lecture — graded assignments start in **Lecture 2**. To prepare:
-
-- Re-read the diagram in [`CS-675-1.drawio.pdf`](./CS-675-1.drawio.pdf) and the **Key Terms** above; this vocabulary will come up again next class.
-- Skim the Hadoop section of *Practical Data Science with Hadoop and Spark* (Mendelevitch et al., Chapter 1) if you have access. We will cover the same material in class.
-- Make sure **Docker is installed** on the machine you'll use for the course — the Lecture 2 assignment will start there. Watch [`../lecture-2/assignments/`](../lecture-2/assignments/) for it once we hand it out.
-
-## Summary
-
-- One RDBMS hits a CPU / memory / disk wall on big data.
-- **Sharding** postpones the wall by pushing complexity into application code.
-- Past ~1 TB, data must live across many machines — the rest of the course is about that world.
-
-## References & further reading
-
-- Mendelevitch, Stella, and Eadline. *Practical Data Science with Hadoop and Spark*. Pearson, 2017 — Chapter 1.
-- Stonebraker, M. *The End of an Architectural Era (It's Time for a Complete Rewrite)*. VLDB 2007 — background on why RDBMSs hit scale walls.
-- The diagram in [`CS-675-1.drawio.pdf`](./CS-675-1.drawio.pdf) — visual summary of everything above.

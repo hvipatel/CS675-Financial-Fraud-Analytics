@@ -151,7 +151,7 @@ No assignment for this lecture — graded assignments start in **Lecture 2**. To
 
 - Re-read the diagram in [`CS-675-1.drawio.pdf`](./CS-675-1.drawio.pdf) and the **Key Terms** above; this vocabulary will come up again next class.
 - Skim the Hadoop section of *Practical Data Science with Hadoop and Spark* (Mendelevitch et al., Chapter 1) if you have access. We will cover the same material in class.
-- Make sure **Docker is installed** on the machine you'll use for the course — the Lecture 2 assignment will start there. Watch [`../Lecture 2/assignments/`](../Lecture%202/assignments/) for it once we hand it out.
+- Make sure **Docker is installed** on the machine you'll use for the course — the Lecture 2 assignment will start there. Watch [`../lecture-2/assignments/`](../lecture-2/assignments/) for it once we hand it out.
 
 ## Summary
 

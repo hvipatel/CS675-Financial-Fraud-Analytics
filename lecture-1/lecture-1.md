@@ -10,7 +10,7 @@ Welcome to CS-675. In this first class we set up the language we will use all se
 - **OLTP**: Online Transaction Processing — short, frequent, consistent writes. The world RDBMSs were designed for.
 - **OLAP**: Online Analytical Processing — large reads over historical data for analysis. The world big-data systems mostly serve.
 - **Transactional database**: A database that supports transactions (ACID). Example: any standard RDBMS.
-- **Operational database**: A database used for day-to-day reads/writes but **without** transaction guarantees. Example: most NoSQL stores (MongoDB, Cassandra, HBase).
+- **Non-transactional (operational) database**: A database designed for high-throughput day-to-day reads/writes that trades full ACID guarantees for scalability. Example: most NoSQL stores (MongoDB, Cassandra, HBase).
 - **The V's of Big Data**: A set of properties (volume, velocity, variety, value, veracity, variability, volatility, complexity) used to characterize what makes a dataset "big."
 - **Data locality**: The principle of moving computation to the node holding the data rather than streaming the data to the node running the computation. (We will use this in Lecture 2.)
 
@@ -111,11 +111,11 @@ A useful rule of thumb (we'll refine it later in the semester):
 
 | Class | Size | Typical tools | Why it fits |
 |---|---|---|---|
-| Small | < 10 GB | Excel, R, MATLAB, pandas | Barely fits in one machine's memory |
-| Medium | 10 GB – 1 TB | Data warehouses, single-server RDBMS | Barely fits on one machine's disk |
+| Small | < 10 GB | Excel, R, MATLAB, pandas | Fits comfortably in one machine's memory |
+| Medium | 10 GB – 1 TB | Data warehouses, single-server RDBMS | Fits on one machine's disk but strains memory |
 | Big | > 1 TB | Hadoop, Spark, distributed databases | Has to live across many machines |
 
-The course is about the third row. Everything we cover from Lecture 2 onward is a tool for living in that row.
+These boundaries are approximate and shift as hardware improves — the conceptual tiers (fits in memory → fits on one disk → requires distribution) matter more than the specific numbers. The course is about the third row. Everything we cover from Lecture 2 onward is a tool for living in that row.
 
 ## 6. A first system sketch
 

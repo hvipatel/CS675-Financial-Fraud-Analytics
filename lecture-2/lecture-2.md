@@ -1,6 +1,6 @@
 # Lecture 2 — Hadoop and the Distributed Idea
 
-Last time we ended on a question: *if one machine is not enough, what does it actually take to run a job across many?* In this lecture we'll answer that with three concrete problems and three concrete ideas that, together, become **Hadoop** — the framework that made distributed big-data processing routine. We'll also do a short Python warm-up and pick up our first graded assignment.
+Last time we ended on a question: *if one machine is not enough, what does it actually take to run a job across many?* In this lecture we'll answer that with three concrete problems and three concrete ideas that, together, become **Hadoop** — the framework that made distributed big-data processing routine.
 
 ## Key Terms
 
@@ -49,7 +49,7 @@ The first generation of distributed computing (think **MPI**) kept compute and s
 2. Process it.
 3. Push the result back.
 
-As soon as data volume grew, the network became the bottleneck. Doubling the data did not double the job time — it more than doubled it, because *more bytes had to traverse the wire*.
+As soon as data volume grew, the network became the bottleneck. Doubling the data could more than double the job time, because all that data competed for the same fixed network bandwidth — congestion on the shared links made the slowdown worse than linear.
 
 ```mermaid
 architecture-beta
@@ -159,17 +159,7 @@ The data-science role straddles two halves:
 - A **data engineer** builds the pipelines that move and shape data — the storage layer, the processing layer, the orchestration. This is most of what CS-675 covers.
 - An **applied data scientist** uses those pipelines to ask questions of the data — feature design, modeling, evaluation, deployment.
 
-Real teams are usually a mix of both, and the skills shift across that line as careers develop. In this course we're touring the engineering side, but with enough applied-science framing that you can see how the two connect. The data-science lifecycle we sketched in Lecture 1 (Ask → Acquire → Clean → Explore → Build → Evaluate) sits *on top* of the systems we'll be building.
-
-## 4. First assignment
-
-The first graded assignment is handed out today. Details live in [`assignments/assignment-1.md`](./assignments/assignment-1.md) (added separately). At the highest level, it asks you to confirm three things:
-
-1. **Docker** is installed and you can run a container.
-2. **Python** is running on your machine (or in Colab) and you can load a CSV.
-3. **Git** is set up and you can push to a course repo.
-
-Specifics — including the due date and submission format — are in the assignment file. Read it before you leave today; it is short on purpose.
+Real teams are usually a mix of both, and the skills shift across that line as careers develop. In this course we're touring the engineering side, but with enough applied-science framing that you can see how the two connect. A common framing of the data-science lifecycle — Ask → Acquire → Clean → Explore → Build → Evaluate — sits *on top* of the systems we'll be building.
 
 ## References & further reading
 

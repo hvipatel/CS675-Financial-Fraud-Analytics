@@ -25,7 +25,7 @@ Source: Larose & Larose, *Data Mining and Predictive Analytics* (Wiley, 2015), C
 
 Two examples of what this looks like in practice:
 
-- **U.S. 2012 Presidential election** — the Obama campaign used a data-mining model to identify *likely* Obama voters and make sure they got to the polls. A separate model predicted county-by-county outcomes. In Hamilton, Ohio, the model said 56.4%; the actual result was 56.6% — off by 0.02%.
+- **U.S. 2012 Presidential election** — the Obama campaign used a data-mining model to identify *likely* Obama voters and make sure they got to the polls. A separate model predicted county-by-county outcomes. In Hamilton, Ohio, the model said 56.4%; the actual result was 56.6% — off by just 0.2 percentage points.
 - **Bank of America's West Coast call center** — 13 million customer calls a month. Before data mining, every caller heard the same up-sell. After: agents see each caller's profile and offer products tailored to that specific person.
 
 ### Why now?
@@ -38,7 +38,7 @@ A few forces have come together:
 - Competitive pressure — your competitors are doing it.
 - More compute and storage at lower cost.
 
-**But we are short on people who can do this well.** McKinsey projects a shortage of 140,000–190,000 deep-analytics roles in the US, plus 1.5 million managers and analysts who know how to *use* big-data insights. That shortage is a big part of why a course like this exists.
+**But we are short on people who can do this well.** A 2011 McKinsey Global Institute report projected a shortage of 140,000–190,000 deep-analytics roles in the US, plus 1.5 million managers and analysts who know how to *use* big-data insights. The landscape has evolved since then, but the core gap — people who can bridge domain knowledge and technical execution — persists.
 
 ### Data mining is NOT automatic
 
@@ -50,7 +50,7 @@ Humans must be involved in every phase. §2 below makes this concrete — two of
 
 ## 2. The CRISP-DM Lifecycle
 
-**CRISP-DM** (Cross-Industry Standard Process for Data Mining) was developed in 1996 by a consortium including DaimlerChrysler, SPSS, and NCR. It is **industry-, tool-, and application-neutral**, non-proprietary, and freely available — which is why it has stuck around for almost three decades.
+**CRISP-DM** (Cross-Industry Standard Process for Data Mining) was initiated in 1996 and published in 2000 by a consortium including DaimlerChrysler, SPSS, and NCR. It is **industry-, tool-, and application-neutral**, non-proprietary, and freely available — which is why it has stuck around for almost three decades.
 
 It has **six phases** and is explicitly **iterative**: you usually don't move strictly forward through them; you cycle back when something earlier turns out to need rework.
 
@@ -129,7 +129,7 @@ Examples:
 
 #### A worked example: linear regression on GPA
 
-Figure 1.2 in the textbook slides (page 17 of DataPreparation-LectureNotes-Week3.pdf) shows a scatter plot of graduate GPA versus undergraduate GPA for 1000 students, with the best-fitting regression line drawn through it. Linear regression chooses the line that minimizes the total error across all points; for this dataset, the line is:
+Figure 1.2 in Larose & Larose (Ch. 1) shows a scatter plot of graduate GPA versus undergraduate GPA for 1000 students, with the best-fitting regression line drawn through it. Linear regression chooses the line that minimizes the total error across all points; for this dataset, the line is:
 
 `ŷ = 1.24 + 0.67 x`
 
@@ -180,7 +180,7 @@ flowchart LR
 
 #### A two-predictor example: which drug to prescribe?
 
-The textbook walks through a classification problem with only two predictors — patient age (x-axis) and patient sodium / potassium ratio (y-axis) — and the target is which drug was previously prescribed. With only two predictors, we can visualize the entire training set as a scatter plot. Figure 1.3 in the textbook slides (page 23 of DataPreparation-LectureNotes-Week3.pdf) shows 200 past patients plotted that way, with their points shaded according to which drug they received:
+The textbook walks through a classification problem with only two predictors — patient age (x-axis) and patient sodium / potassium ratio (y-axis) — and the target is which drug was previously prescribed. With only two predictors, we can visualize the entire training set as a scatter plot. Figure 1.3 in Larose & Larose (Ch. 1) shows 200 past patients plotted that way, with their points shaded according to which drug they received:
 
 - Light grey → Drug Y
 - Medium grey → Drug A or X
@@ -211,7 +211,7 @@ Clustering is the first task we've seen with **no target variable.** We aren't t
 
 PRIZM describes cluster #01 (*Upper Crust*) as **the nation's most exclusive address** — a haven for empty-nesting couples earning over $100,000/year.
 
-No one *told* PRIZM that 90210 was wealthy. The clustering algorithm discovered the grouping from demographic features alone. (The full 66-cluster table appears on page 26 of DataPreparation-LectureNotes-Week3.pdf.)
+No one *told* PRIZM that 90210 was wealthy. The clustering algorithm discovered the grouping from demographic features alone. (The full 66-cluster table appears in Larose & Larose, Ch. 1.)
 
 #### Where clustering shows up
 

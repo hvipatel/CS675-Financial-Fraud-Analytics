@@ -23,6 +23,7 @@ from spark_helper import get_spark, print_ui_urls, require_files
 
 
 def declared_schema() -> StructType:
+    """Explicit schema — single-pass CSV parse, no type sniffing."""
     return StructType([
         StructField("ride_id", StringType()),
         StructField("rideable_type", StringType()),
@@ -55,18 +56,20 @@ def main() -> None:
     csv_mb = os.path.getsize(CITIBIKE_CSV) / 1_048_576
     print(f"CSV on disk: {csv_mb:.2f} MB")
 
+    # ----- Schema inference: Spark reads the file TWICE (sniff + parse) -----
     t0 = time.time()
     n_inferred = (
         spark.read
-        .option("header", "true").option("inferSchema", "true")
-        .csv(CITIBIKE_CSV).count()
+        .option("header", "true").option("inferSchema", "true")          # inference makes 2 passes over the file
+        .csv(CITIBIKE_CSV).count()                                         # count() forces the read
     )
     t_inferred = time.time() - t0
 
+    # ----- Declared schema: one pass, no inference -----
     t0 = time.time()
     df = (
         spark.read
-        .option("header", "true").schema(declared_schema())
+        .option("header", "true").schema(declared_schema())                # explicit schema → single pass
         .csv(CITIBIKE_CSV)
     )
     n_declared = df.count()
@@ -78,29 +81,30 @@ def main() -> None:
 
     print("\n--- Top 5 start stations ---")
     (
-        df.filter(F.col("start_station_name").isNotNull())
+        df.filter(F.col("start_station_name").isNotNull())                # drop rows missing station name
         .groupBy("start_station_name").count()
         .orderBy(F.col("count").desc()).limit(5).show(truncate=False)
     )
 
     print("--- Rideable type by member status ---")
     (
-        df.groupBy("rideable_type", "member_casual").count()
+        df.groupBy("rideable_type", "member_casual").count()              # group by two keys at once
         .orderBy("rideable_type", "member_casual").show(truncate=False)
     )
 
     print("--- Trips by hour of day ---")
     (
-        df.withColumn("hour", F.hour("started_at"))
+        df.withColumn("hour", F.hour("started_at"))                       # derived column from timestamp
         .groupBy("hour").count().orderBy("hour").show(24, truncate=False)
     )
 
+    # ----- Write Parquet and compare sizes + read times -----
     parquet_path = CITIBIKE_CSV.replace(".csv", ".parquet")
-    df.write.mode("overwrite").parquet(parquet_path)
+    df.write.mode("overwrite").parquet(parquet_path)                      # write same data in columnar Parquet
     parquet_mb = dir_size_mb(parquet_path)
 
     t0 = time.time()
-    n_pq = spark.read.parquet(parquet_path).count()
+    n_pq = spark.read.parquet(parquet_path).count()                       # action: re-read Parquet
     t_pq = time.time() - t0
 
     print("--- CSV vs Parquet ---")

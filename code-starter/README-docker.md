@@ -137,7 +137,7 @@ After it finishes, open <http://localhost:18080> in your browser. Your run shoul
 
 ## Step 4 — Explore the other analyses
 
-The starter ships three datasets and five analyses. The pattern: `download-*` to fetch a dataset, `analyze-*` to run a script over it. The four `analyze-nyc-cab-data-use-case-{a,b,c,d}` targets all read the *same* Parquet but ask different questions — that's how you'll usually work in practice.
+The starter ships four datasets and eight analyses. The pattern: `download-*` to fetch a dataset, `analyze-*` to run a script over it. The `analyze-nyc-cab-data-use-case-{a,b,c,e,f}` targets all read the *same* taxi Parquet but ask different questions — that's how you'll usually work in practice.
 
 ### Datasets
 
@@ -146,18 +146,22 @@ The starter ships three datasets and five analyses. The pattern: `download-*` to
 | `make download-nyc-cab-data` | NYC TLC yellow-taxi Parquet (~48 MB, ~3 M rows). The primary fact table. |
 | `make download-nyc-cab-zones-data` | NYC TLC zone lookup CSV (~12 KB, 265 rows). The dimension table for `PULocationID` / `DOLocationID` in the Parquet. |
 | `make download-nyc-bikes-data` | JC Citi Bike monthly CSV (~10 MB, ~50 K rows). A standalone dataset, no relationship to the taxi data. |
+| `make download-shakespeare-data` | Shakespeare's complete works (~5.6 MB plain text from Project Gutenberg). The text corpus for the classic word-count example. |
 
 ### Analyses
 
-The scripts are numbered `00` → `05` in **rising order of complexity** — `00` is just "make a tiny DataFrame", and by `05` you're declaring schemas, timing CSV vs Parquet, and writing files back out. If this is your first time with PySpark, run them in order; if you're comfortable, jump straight to whichever interests you.
+Scripts are numbered `00` → `08` in **rising order of complexity**. `00` is just "make a tiny DataFrame"; by `08` you're training a logistic-regression classifier. Each script layers one or two new PySpark concepts onto the previous. If this is your first time with PySpark, run them in order; if you're comfortable, jump straight to whichever interests you.
 
 | Target | Script | What it does |
 |---|---|---|
-| `make analyze-nyc-cab-data-use-case-a` | `01_taxi_analysis.py` | **Trip overview** — top pickup hours, fare-vs-passenger-count, longest trips. |
-| `make analyze-nyc-cab-data-use-case-b` | `02_taxi_tipping.py` | **Tipping behavior** — tip % by payment type, by hour, and the distribution. |
-| `make analyze-nyc-cab-data-use-case-c` | `03_taxi_payments.py` | **Payment methods** — credit vs cash share, revenue per method, refund rate. |
-| `make analyze-nyc-cab-data-use-case-d` | `04_zones_analysis.py` | **Zones join** — broadcasts the small lookup CSV against the big Parquet, then aggregates by borough. *Needs both* `download-nyc-cab-data` *and* `download-nyc-cab-zones-data`. |
-| `make analyze-nyc-bikes-data-use-case-a` | `05_citibike_analysis.py` | **CSV → Parquet** — reads the bikes CSV with and without a declared schema, converts to Parquet, compares sizes and read times. |
+| `make analyze-shakespeare-data-use-case-a` | `01_word_count.py` | **Word count** — the classic MapReduce example. Reads text → tokenizes → counts. Anchors the MapReduce → Spark bridge in Lecture 4. |
+| `make analyze-nyc-cab-data-use-case-a` | `02_taxi_analysis.py` | **Trip overview** — top pickup hours, fare-vs-passenger-count, longest trips. |
+| `make analyze-nyc-cab-data-use-case-b` | `03_taxi_tipping.py` | **Tipping behavior** — tip % by payment type, by hour, and the distribution. |
+| `make analyze-nyc-cab-data-use-case-c` | `04_taxi_payments.py` | **Payment methods** — credit vs cash share, revenue per method, refund rate. |
+| `make analyze-nyc-cab-data-use-case-e` | `05_taxi_data_prep.py` | **Data preparation** (Lecture 3) — missing-value inspection, median imputation, IQR outlier detection, z-score normalization, equal-frequency binning, one-hot encoding. |
+| `make analyze-nyc-cab-data-use-case-d` | `06_zones_analysis.py` | **Zones join** — broadcasts the small lookup CSV against the big Parquet, then aggregates by borough. *Needs both* `download-nyc-cab-data` *and* `download-nyc-cab-zones-data`. |
+| `make analyze-nyc-bikes-data-use-case-a` | `07_citibike_analysis.py` | **CSV → Parquet** — reads the bikes CSV with and without a declared schema, converts to Parquet, compares sizes and read times. |
+| `make analyze-nyc-cab-data-use-case-f` | `08_taxi_classification.py` | **Classification with MLlib** (Lecture 2b) — predict whether a credit-card trip got a tip. VectorAssembler + LogisticRegression + AUC evaluation. |
 
 Each script finishes in a few seconds. Try them in any order; they're independent. Open <http://localhost:18080> after each to see the run land there.
 
@@ -168,7 +172,7 @@ Each script lives in `work/` as a tiny, focused Python file. They share three he
 - `work/constants.py` — data paths and URLs.
 - `work/spark_helper.py` — a `get_spark(name)` that builds a SparkSession (with event logging into the History Server) and a `require_files(...)` that errors usefully if a dataset isn't downloaded yet.
 
-If you want to write your own analysis, copy any of the `01_…` through `03_…` files — they're under 50 lines each, and the pattern is the same every time: import helpers, require files, do the analysis, print the UI URLs.
+If you want to write your own analysis, copy any of `02_…` through `04_…` (the simpler taxi scripts) — they're around 50 lines each, and the pattern is the same every time: import helpers, require files, do the analysis, print the UI URLs.
 
 ## All targets at a glance
 
@@ -185,15 +189,19 @@ make help
 | `make restart` | Stop and start again |
 | `make logs` | Tail container logs |
 | `make shell` | Open a bash shell inside the pyspark container |
-| `make hello` | Run the smoke test |
+| `make hello` | Run the smoke test (`00_hello_spark.py`) |
 | `make download-nyc-cab-data` | Download the NYC taxi Parquet |
 | `make download-nyc-cab-zones-data` | Download the NYC taxi zone lookup CSV |
 | `make download-nyc-bikes-data` | Download the JC Citi Bike CSV |
-| `make analyze-nyc-cab-data-use-case-a` | Run the trip-overview analysis |
-| `make analyze-nyc-cab-data-use-case-b` | Run the tipping analysis |
-| `make analyze-nyc-cab-data-use-case-c` | Run the payments analysis |
-| `make analyze-nyc-cab-data-use-case-d` | Run the zones broadcast-join analysis |
-| `make analyze-nyc-bikes-data-use-case-a` | Run the Citi Bike CSV/Parquet comparison |
+| `make download-shakespeare-data` | Download Shakespeare's complete works |
+| `make analyze-shakespeare-data-use-case-a` | Run the word-count analysis (`01_word_count.py`) |
+| `make analyze-nyc-cab-data-use-case-a` | Run the trip-overview analysis (`02_taxi_analysis.py`) |
+| `make analyze-nyc-cab-data-use-case-b` | Run the tipping analysis (`03_taxi_tipping.py`) |
+| `make analyze-nyc-cab-data-use-case-c` | Run the payments analysis (`04_taxi_payments.py`) |
+| `make analyze-nyc-cab-data-use-case-d` | Run the zones broadcast-join analysis (`06_zones_analysis.py`) |
+| `make analyze-nyc-cab-data-use-case-e` | Run the data-prep walkthrough (`05_taxi_data_prep.py`) |
+| `make analyze-nyc-cab-data-use-case-f` | Run the MLlib classification (`08_taxi_classification.py`) |
+| `make analyze-nyc-bikes-data-use-case-a` | Run the Citi Bike CSV/Parquet comparison (`07_citibike_analysis.py`) |
 | `make test` | Run the pytest suite |
 | `make history` | Print the History Server URL |
 | `make clean` | Stop containers and remove named volumes (wipes event-log history) |

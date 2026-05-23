@@ -95,18 +95,21 @@ Expand-Archive $env:TEMP\citibike.zip -DestinationPath work\data\
 Remove-Item $env:TEMP\citibike.zip
 ```
 
-Then run any of the analyses — they're numbered `00` → `05` in rising order of complexity:
+Then run any of the analyses — they're numbered `00` → `08` in rising order of complexity:
 
 ```
-uv run python work\00_hello_spark.py        # smoke test
-uv run python work\01_taxi_analysis.py      # cab trip overview
-uv run python work\02_taxi_tipping.py       # cab tipping behavior
-uv run python work\03_taxi_payments.py      # cab payment methods
-uv run python work\04_zones_analysis.py     # cab × zones broadcast join
-uv run python work\05_citibike_analysis.py  # CSV → Parquet on Citi Bike
+uv run python work\00_hello_spark.py            # smoke test
+uv run python work\01_word_count.py             # word count on Shakespeare text
+uv run python work\02_taxi_analysis.py          # cab trip overview
+uv run python work\03_taxi_tipping.py           # cab tipping behavior
+uv run python work\04_taxi_payments.py          # cab payment methods
+uv run python work\05_taxi_data_prep.py         # cab data preparation (Lecture 3)
+uv run python work\06_zones_analysis.py         # cab × zones broadcast join
+uv run python work\07_citibike_analysis.py      # CSV → Parquet on Citi Bike
+uv run python work\08_taxi_classification.py    # cab tip classifier (Lecture 2b)
 ```
 
-If this is your first time with PySpark, run them in order. Three of them (`01`–`03`) read the same Parquet but ask different questions — a small worked example of building an analysis suite around one dataset.
+If this is your first time with PySpark, run them in order. Scripts `02`–`05` read the same Parquet but ask different questions — a small worked example of building an analysis suite around one dataset.
 
 ## 7. Run the test suite
 

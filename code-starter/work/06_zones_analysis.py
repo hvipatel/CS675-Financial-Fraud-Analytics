@@ -21,30 +21,32 @@ def main() -> None:
     spark = get_spark("cs675-zones-join")
     start = time.time()
 
+    # Small CSV: schema inference is cheap because the file is tiny.
     zones = (
         spark.read
-        .option("header", "true").option("inferSchema", "true")
+        .option("header", "true").option("inferSchema", "true")             # read CSV w/ header + types inferred
         .csv(ZONES_CSV)
     )
-    trips = spark.read.parquet(TAXI_PARQUET)
+    trips = spark.read.parquet(TAXI_PARQUET)                                 # big fact table from Parquet
     print(f"Zones: {zones.count()} rows    Trips: {trips.count():,} rows")
 
+    # F.broadcast() sends the small dim table to every executor → no shuffle on the big fact.
     joined = trips.join(
         F.broadcast(zones),
-        trips["PULocationID"] == zones["LocationID"],
-        "left",
+        trips["PULocationID"] == zones["LocationID"],                        # join on the foreign key
+        "left",                                                               # keep all trips even if no zone matches
     )
 
     print("\n--- Top 10 pickup zones by trip count ---")
     (
-        joined.groupBy("Borough", "Zone").count()
+        joined.groupBy("Borough", "Zone").count()                            # aggregate at zone granularity
         .orderBy(F.col("count").desc()).limit(10)
         .show(truncate=False)
     )
 
     print("--- Average fare by pickup borough ---")
     (
-        joined.groupBy("Borough")
+        joined.groupBy("Borough")                                             # roll up one level to borough
         .agg(
             F.round(F.avg("fare_amount"), 2).alias("avg_fare_usd"),
             F.count("*").alias("n_trips"),

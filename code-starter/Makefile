@@ -6,8 +6,11 @@
 
 .PHONY: help up down restart logs shell hello test history clean \
         download-nyc-cab-data download-nyc-cab-zones-data download-nyc-bikes-data \
+        download-shakespeare-data \
+        analyze-shakespeare-data-use-case-a \
         analyze-nyc-cab-data-use-case-a analyze-nyc-cab-data-use-case-b \
         analyze-nyc-cab-data-use-case-c analyze-nyc-cab-data-use-case-d \
+        analyze-nyc-cab-data-use-case-e analyze-nyc-cab-data-use-case-f \
         analyze-nyc-bikes-data-use-case-a
 
 # NYC TLC yellow-taxi Parquet (~48 MB / ~3 M rows) — the primary fact table.
@@ -23,6 +26,10 @@ NYC_BIKES_URL  := https://s3.amazonaws.com/tripdata/JC-202401-citibike-tripdata.
 NYC_BIKES_ZIP  := /tmp/JC-202401-citibike-tripdata.csv.zip
 NYC_BIKES_FILE := /home/jovyan/work/data/JC-202401-citibike-tripdata.csv
 
+# Shakespeare's complete works from Project Gutenberg (~5.6 MB) — for word-count demos.
+SHAKESPEARE_URL  := https://www.gutenberg.org/cache/epub/100/pg100.txt
+SHAKESPEARE_FILE := /home/jovyan/work/data/shakespeare_complete_works.txt
+
 help:
 	@echo "CS-675 Code Starter — make targets"
 	@echo ""
@@ -35,21 +42,29 @@ help:
 	@echo "  make clean                               Stop and remove named volumes (drops event-log history too)"
 	@echo ""
 	@echo "Datasets (download once, reused by analyses)"
-	@echo "  make download-nyc-cab-data               NYC TLC yellow-taxi Parquet  (~48 MB / ~3 M rows)"
-	@echo "  make download-nyc-cab-zones-data         NYC TLC taxi zone lookup CSV (~12 KB / 265 rows)"
-	@echo "  make download-nyc-bikes-data             JC Citi Bike monthly CSV     (~10 MB / ~50 K rows)"
+	@echo "  make download-nyc-cab-data               NYC TLC yellow-taxi Parquet   (~48 MB / ~3 M rows)"
+	@echo "  make download-nyc-cab-zones-data         NYC TLC taxi zone lookup CSV  (~12 KB / 265 rows)"
+	@echo "  make download-nyc-bikes-data             JC Citi Bike monthly CSV      (~10 MB / ~50 K rows)"
+	@echo "  make download-shakespeare-data           Shakespeare complete works    (~5.6 MB plain text)"
+	@echo ""
+	@echo "Scripts 00–08 are numbered in rising order of complexity."
+	@echo ""
+	@echo "Analyses on Shakespeare text"
+	@echo "  make analyze-shakespeare-data-use-case-a Word count (01_word_count.py)                        — MapReduce classic"
 	@echo ""
 	@echo "Analyses on NYC cab data (same Parquet, different questions)"
-	@echo "  make analyze-nyc-cab-data-use-case-a     Trip overview          (01_taxi_analysis.py)"
-	@echo "  make analyze-nyc-cab-data-use-case-b     Tipping behavior       (02_taxi_tipping.py)"
-	@echo "  make analyze-nyc-cab-data-use-case-c     Payment methods        (03_taxi_payments.py)"
-	@echo "  make analyze-nyc-cab-data-use-case-d     Zones broadcast join   (04_zones_analysis.py — also needs the zones CSV)"
+	@echo "  make analyze-nyc-cab-data-use-case-a     Trip overview        (02_taxi_analysis.py)"
+	@echo "  make analyze-nyc-cab-data-use-case-b     Tipping behavior     (03_taxi_tipping.py)"
+	@echo "  make analyze-nyc-cab-data-use-case-c     Payment methods      (04_taxi_payments.py)"
+	@echo "  make analyze-nyc-cab-data-use-case-d     Zones broadcast join (06_zones_analysis.py — also needs the zones CSV)"
+	@echo "  make analyze-nyc-cab-data-use-case-e     Data preparation     (05_taxi_data_prep.py — Lecture 3)"
+	@echo "  make analyze-nyc-cab-data-use-case-f     Classification (MLlib) (08_taxi_classification.py — Lecture 2b)"
 	@echo ""
 	@echo "Analyses on NYC bikes data"
-	@echo "  make analyze-nyc-bikes-data-use-case-a   CSV vs Parquet         (05_citibike_analysis.py)"
+	@echo "  make analyze-nyc-bikes-data-use-case-a   CSV vs Parquet       (07_citibike_analysis.py)"
 	@echo ""
 	@echo "Other"
-	@echo "  make hello                               Smoke test (hello_spark.py)"
+	@echo "  make hello                               Smoke test (00_hello_spark.py)"
 	@echo "  make test                                Run pytest inside the container"
 	@echo "  make history                             Print the Spark History Server URL"
 
@@ -85,22 +100,34 @@ download-nyc-cab-zones-data:
 download-nyc-bikes-data:
 	docker compose exec pyspark bash -c 'test -f $(NYC_BIKES_FILE) && echo "Already downloaded: $(NYC_BIKES_FILE)" || (echo "Downloading NYC bikes data..." && curl -L --fail -o $(NYC_BIKES_ZIP) $(NYC_BIKES_URL) && unzip -p $(NYC_BIKES_ZIP) "JC-*.csv" > $(NYC_BIKES_FILE) && rm -f $(NYC_BIKES_ZIP) && echo "Saved: $(NYC_BIKES_FILE)")'
 
+download-shakespeare-data:
+	docker compose exec pyspark bash -c 'test -f $(SHAKESPEARE_FILE) && echo "Already downloaded: $(SHAKESPEARE_FILE)" || (echo "Downloading Shakespeare complete works..." && curl -L --fail -o $(SHAKESPEARE_FILE) $(SHAKESPEARE_URL) && echo "Saved: $(SHAKESPEARE_FILE)")'
+
 # ----- Analyses ---------------------------------------------------------------
 
+analyze-shakespeare-data-use-case-a:
+	docker compose exec pyspark python /home/jovyan/work/01_word_count.py
+
 analyze-nyc-cab-data-use-case-a:
-	docker compose exec pyspark python /home/jovyan/work/01_taxi_analysis.py
+	docker compose exec pyspark python /home/jovyan/work/02_taxi_analysis.py
 
 analyze-nyc-cab-data-use-case-b:
-	docker compose exec pyspark python /home/jovyan/work/02_taxi_tipping.py
+	docker compose exec pyspark python /home/jovyan/work/03_taxi_tipping.py
 
 analyze-nyc-cab-data-use-case-c:
-	docker compose exec pyspark python /home/jovyan/work/03_taxi_payments.py
+	docker compose exec pyspark python /home/jovyan/work/04_taxi_payments.py
 
 analyze-nyc-cab-data-use-case-d:
-	docker compose exec pyspark python /home/jovyan/work/04_zones_analysis.py
+	docker compose exec pyspark python /home/jovyan/work/06_zones_analysis.py
+
+analyze-nyc-cab-data-use-case-e:
+	docker compose exec pyspark python /home/jovyan/work/05_taxi_data_prep.py
+
+analyze-nyc-cab-data-use-case-f:
+	docker compose exec pyspark python /home/jovyan/work/08_taxi_classification.py
 
 analyze-nyc-bikes-data-use-case-a:
-	docker compose exec pyspark python /home/jovyan/work/05_citibike_analysis.py
+	docker compose exec pyspark python /home/jovyan/work/07_citibike_analysis.py
 
 # ----- Tests / utilities ------------------------------------------------------
 

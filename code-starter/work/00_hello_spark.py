@@ -24,7 +24,6 @@ print("\n>>> Step 1: Start with a plain Python list of tuples")
 data = [(i, i * i) for i in range(10)]
 print(f"Python data (first 3 of {len(data)}): {data[:3]}")
 
-
 print("\n>>> Step 2: Turn the list into a Spark DataFrame")
 print('PySpark: spark.createDataFrame(data, ["x", "x_squared"])')
 print("SQL    : CREATE TABLE df (x BIGINT, x_squared BIGINT); INSERT INTO df VALUES …;")
@@ -40,7 +39,6 @@ print('PySpark: df.withColumn("x_cubed", F.col("x") * F.col("x") * F.col("x"))')
 print("SQL    : SELECT *, x * x * x AS x_cubed FROM df")
 df_cubed = df.withColumn("x_cubed", F.col("x") * F.col("x") * F.col("x"))    # add new column based on existing ones
 df_cubed.show()
-
 
 print("\n>>> Step 4: Filter rows with filter()")
 print('PySpark: df_cubed.filter(F.col("x") > 5)')

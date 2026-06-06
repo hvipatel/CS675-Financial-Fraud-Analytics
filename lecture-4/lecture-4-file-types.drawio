@@ -1,0 +1,83 @@
+<mxfile host="app.diagrams.net" version="22.0.0">
+  <diagram name="File-Types" id="lecture-4-file-types">
+    <mxGraphModel dx="1200" dy="1200" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="1180" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="Lecture 4 — File Formats: CSV vs Parquet and Columnar Techniques" style="text;html=1;align=center;verticalAlign=middle;fontSize=18;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="1120" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="dataset_hdr" value="Running example data (same 5 employees used across both file-format and database diagrams)" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;fontStyle=2;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="40" y="84" width="1120" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="dataset_body" value="id=1 Alice (Developer, active)   ·   id=2 Bob (Designer, inactive)   ·   id=3 Charlie (Manager, active)   ·   id=4 Dana (Developer, inactive)   ·   id=5 Eve (Designer, active)" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;fontFamily=Courier New;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="40" y="106" width="1120" height="26" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s1_header" value="1.  Same data, two physical layouts" style="text;html=1;align=left;verticalAlign=middle;fontSize=15;fontStyle=1;fillColor=#e1d5e7;strokeColor=#9673a6;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="160" width="1120" height="34" as="geometry" />
+        </mxCell>
+
+        <mxCell id="csv_label" value="CSV — ROW-major (one row at a time)" style="text;html=1;align=center;verticalAlign=middle;fontSize=12;fontStyle=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="40" y="204" width="540" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="csv_data" value="id, name,    role,      active, joined_date&#xa;1,  Alice,   Developer, true,   2026-05-12&#xa;2,  Bob,     Designer,  false,  2024-11-03&#xa;3,  Charlie, Manager,   true,   2026-05-20&#xa;4,  Dana,    Developer, false,  2025-08-15&#xa;5,  Eve,     Designer,  true,   2026-02-28&#xa;&#xa;Disk layout:&#xa;[ row 1 ][ row 2 ][ row 3 ][ row 4 ][ row 5 ]&#xa;&#xa;To compute &quot;avg active rate&quot; the reader scans EVERY byte&#xa;of every row to reach the one column it cares about." style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Courier New;align=left;verticalAlign=top;spacingLeft=12;spacingTop=8;fontSize=11;fillColor=#ffffff;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="40" y="234" width="540" height="220" as="geometry" />
+        </mxCell>
+
+        <mxCell id="parquet_label" value="Parquet — COLUMN-major (one column at a time)" style="text;html=1;align=center;verticalAlign=middle;fontSize=12;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="620" y="204" width="540" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="parquet_data" value="id        :  [ 1, 2, 3, 4, 5 ]&#xa;name      :  [ Alice, Bob, Charlie, Dana, Eve ]&#xa;role      :  [ Developer, Designer, Manager, Developer, Designer ]&#xa;active    :  [ true, false, true, false, true ]&#xa;joined_dt :  [ 2026-05-12, 2024-11-03, 2026-05-20, 2025-08-15, 2026-02-28 ]&#xa;&#xa;Disk layout:&#xa;[ id col ][ name col ][ role col ][ active col ][ joined_dt col ]&#xa;&#xa;To compute &quot;avg active rate&quot; the reader opens ONLY the active&#xa;column — skips the other four entirely (projection pushdown)." style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Courier New;align=left;verticalAlign=top;spacingLeft=12;spacingTop=8;fontSize=11;fillColor=#ffffff;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="620" y="234" width="540" height="220" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s2_header" value="2.  Three speedups columnar gives you" style="text;html=1;align=left;verticalAlign=middle;fontSize=15;fontStyle=1;fillColor=#e1d5e7;strokeColor=#9673a6;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="490" width="1120" height="34" as="geometry" />
+        </mxCell>
+
+        <mxCell id="speedup1" value="(i)  Projection pushdown&#xa;Query asks for 2 of 6 columns → read 2 columns. Row-major has to scan every byte of every row." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;spacingRight=10;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="40" y="534" width="360" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="speedup2" value="(ii)  Better compression&#xa;A column has values of the same type and often the same shape (e.g. all roles are 1 of 3 strings). Columns compress much better than mixed-type rows." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;spacingRight=10;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="420" y="534" width="360" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="speedup3" value="(iii)  Predicate pushdown via min/max stats&#xa;Each row group stores min &amp; max for every column. A query like &quot;joined_date &gt;= 2026-05-01&quot; SKIPS row groups whose max is below that. See §4." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;spacingRight=10;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="800" y="534" width="360" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s3_header" value="3.  Compaction techniques — what lives INSIDE a column chunk" style="text;html=1;align=left;verticalAlign=middle;fontSize=15;fontStyle=1;fillColor=#e1d5e7;strokeColor=#9673a6;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="650" width="1120" height="34" as="geometry" />
+        </mxCell>
+
+        <mxCell id="enc_dict" value="Dictionary encoding (low-cardinality columns)&#xa;&#xa;Raw column:&#xa;  role = [ &quot;Developer&quot;, &quot;Designer&quot;, &quot;Manager&quot;, &quot;Developer&quot;, &quot;Designer&quot; ]&#xa;&#xa;Dictionary:  { 0: &quot;Developer&quot;, 1: &quot;Designer&quot;, 2: &quot;Manager&quot; }&#xa;Codes:       [ 0, 1, 2, 0, 1 ]&#xa;&#xa;Each string is stored ONCE; the column itself becomes tiny integers." style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Courier New;align=left;verticalAlign=top;spacingLeft=12;spacingTop=8;fontSize=11;fillColor=#ffffff;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="40" y="694" width="560" height="160" as="geometry" />
+        </mxCell>
+
+        <mxCell id="enc_rle" value="Run-length encoding (long runs of the same value)&#xa;&#xa;Raw column:&#xa;  active = [ true, true, true, true, false, false ]&#xa;&#xa;RLE:&#xa;  [ (true, 4), (false, 2) ]&#xa;&#xa;Plus general-purpose compression on top: Snappy (fast),&#xa;ZSTD (balanced), GZIP (smaller). Default for Parquet: Snappy." style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Courier New;align=left;verticalAlign=top;spacingLeft=12;spacingTop=8;fontSize=11;fillColor=#ffffff;strokeColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="620" y="694" width="540" height="160" as="geometry" />
+        </mxCell>
+
+        <mxCell id="s4_header" value="4.  Storing a range — row groups + min/max stats let you SKIP data" style="text;html=1;align=left;verticalAlign=middle;fontSize=15;fontStyle=1;fillColor=#e1d5e7;strokeColor=#9673a6;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="880" width="1120" height="34" as="geometry" />
+        </mxCell>
+
+        <mxCell id="rg1" value="Row Group 1&#xa;rows 1–1000&#xa;&#xa;min(joined_date) = 2023-01-12&#xa;max(joined_date) = 2023-12-30" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;fontColor=#666666;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;fontSize=11;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="920" width="240" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="rg2" value="Row Group 2&#xa;rows 1001–2000&#xa;&#xa;min(joined_date) = 2024-01-02&#xa;max(joined_date) = 2024-12-29" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;fontColor=#666666;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;fontSize=11;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="290" y="920" width="240" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="rg3" value="Row Group 3&#xa;rows 2001–3000&#xa;&#xa;min(joined_date) = 2026-05-01&#xa;max(joined_date) = 2026-05-31" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="540" y="920" width="240" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="rg_query" value="QUERY&#xa;WHERE joined_date &gt;= '2026-05-01'&#xa;&#xa;skip Row Group 1   (max &lt; 2026-05-01)&#xa;skip Row Group 2   (max &lt; 2026-05-01)&#xa;READ Row Group 3&#xa;&#xa;Often 1/10th the I/O of a full scan." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="820" y="920" width="340" height="110" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

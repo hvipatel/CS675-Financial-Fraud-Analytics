@@ -1,7 +1,5 @@
 # Lecture 5 — MapReduce
 
-*Companion to `lecture-5.md` (HDFS, YARN, and Local PySpark). This file goes deep on the compute model that HDFS + YARN were originally designed for — and the reason Spark replaced it.*
-
 ## Key Terms
 
 - **ApplicationMaster (AM)**: YARN's per-job coordinator. Schedules mappers and reducers; reassigns failed tasks. *(Full treatment in the HDFS+YARN companion §2.)*

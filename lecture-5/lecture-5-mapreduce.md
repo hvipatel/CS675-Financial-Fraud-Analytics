@@ -2,7 +2,7 @@
 
 ## Key Terms
 
-- **ApplicationMaster (AM)**: YARN's per-job coordinator. Schedules mappers and reducers; reassigns failed tasks. *(Full treatment in the HDFS+YARN companion §2.)*
+- **ApplicationMaster (AM)**: YARN's per-job coordinator. Schedules mappers and reducers; reassigns failed tasks. *(Full treatment in `lecture-5.md` §2.)*
 - **Mapper / Reducer worker**: A NodeManager process running a mapper or reducer task. Usually on the same physical machine as an HDFS DataNode process (data locality — two daemons, one box).
 - **Shuffle**: The phase between Map and Reduce — mappers sort + split output by key on local disk; reducers pull their chunks over the network. *The only phase that crosses machine boundaries.*
 
@@ -14,11 +14,11 @@ MapReduce is a *shape* for distributed computation, not an API to memorize. You 
 - **Shuffle** *(framework)* — groups every pair by key across the cluster. The one phase that crosses machine boundaries.
 - **Reduce** *(parallel)* — one reducer per key; folds the values into one answer.
 
-Mappers run on the DataNode that holds their input split (data locality, covered in the HDFS+YARN companion). The shuffle is where the network bill comes due — usually the slowest part of any MR or Spark job.
+Mappers run on the DataNode that holds their input split (data locality, covered in `lecture-5.md`). The shuffle is where the network bill comes due — usually the slowest part of any MR or Spark job.
 
 ### 1.1 Who runs what — phase by phase
 
-With YARN's roles in hand (from the HDFS+YARN companion), the explicit phase-to-node mapping for a MapReduce job. The **ApplicationMaster** coordinates; the **NodeManager workers** (each sitting on a machine that also runs an HDFS DataNode daemon — same box, two separate processes) do all the reading, computing, and writing.
+With YARN's roles in hand (from `lecture-5.md`), the explicit phase-to-node mapping for a MapReduce job. The **ApplicationMaster** coordinates; the **NodeManager workers** (each sitting on a machine that also runs an HDFS DataNode daemon — same box, two separate processes) do all the reading, computing, and writing.
 
 | Phase | Who runs it | What that node actually does |
 |---|---|---|
@@ -27,7 +27,7 @@ With YARN's roles in hand (from the HDFS+YARN companion), the explicit phase-to-
 | **Shuffle — write** | Same mapper worker | Sorts + partitions output by key range; writes to LOCAL disk (not HDFS). |
 | **Shuffle — pull** | Reducer workers | Each reducer pulls its partition from every mapper's worker over the network. *The network-heavy step.* |
 | **Reduce** | Reducer worker | Receives one key + the merged list of values; runs `reduce()`; emits the answer. |
-| **Final write** | Reducer worker | Writes result to HDFS (replicated 3× by default — see companion §1.2). |
+| **Final write** | Reducer worker | Writes result to HDFS (replicated 3× by default — see `lecture-5.md` §1.2). |
 
 Both worked examples below trace each step to one of these rows.
 

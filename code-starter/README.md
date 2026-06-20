@@ -2,11 +2,12 @@
 
 PySpark dev environment for CS-675. Choose your path:
 
-- **Docker** (recommended) → [README-docker.md](README-docker.md)
-- **Native macOS** → [README-mac.md](README-mac.md)
-- **Native Windows** → [README-windows.md](README-windows.md)
+- **Run on your own computer** (fastest, no Docker) → [run-on-your-own.md](run-on-your-own.md)
+- **Docker** (recommended for the full setup) → [README-docker.md](README-docker.md)
+- **Native macOS** (uv-managed) → [README-mac.md](README-mac.md)
+- **Native Windows** (uv-managed) → [README-windows.md](README-windows.md)
 
-All three paths run the same scripts and pass the same test suite. The Docker path adds an always-on **Spark History Server** at http://localhost:18080 alongside the live Spark UI; the native paths run the live UI only.
+The Docker and native paths run the same scripts and pass the same test suite; "run on your own computer" is a no-frills `pip install pyspark` path for quick practice. The Docker path adds an always-on **Spark History Server** at http://localhost:18080 alongside the live Spark UI; the native paths run the live UI only.
 
 ## What's in this directory
 
@@ -23,6 +24,7 @@ code-starter/
 └── work/                         # your code goes here (bind-mounted into the container)
     ├── constants.py              # data paths, ports, container detection
     ├── spark_helper.py           # get_spark(), print_ui_urls(), require_files()
+    ├── practice.py               # self-contained practice (generates its own data) — python practice.py
     ├── 00_hello_spark.py         # smoke test                       — make hello
     ├── 01_word_count.py          # word count on Shakespeare text   — make analyze-shakespeare-data-use-case-a
     ├── 02_taxi_analysis.py       # cab trip overview                — make analyze-nyc-cab-data-use-case-a

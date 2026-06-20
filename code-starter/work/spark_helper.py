@@ -2,9 +2,19 @@
 import os
 import sys
 
-from pyspark.sql import SparkSession
+from pyspark.sql import DataFrame, SparkSession
 
 from constants import EVENT_LOG_DIR, HISTORY_URL, LIVE_UI_URL
+
+
+def show_step(caption: str, df: DataFrame, n: int = 5) -> None:
+    """Print a labeled snapshot of a DataFrame (first n rows). Presentation only.
+
+    Shared by the work/ scripts so the analysis code stays separate from the
+    print boilerplate.
+    """
+    print(f"\n--- {caption} ---")
+    df.show(n, truncate=False)
 
 
 def get_spark(app_name: str, master: str = "local[*]") -> SparkSession:

@@ -1,19 +1,19 @@
-"""Data-preparation pipeline on the yellow-taxi Parquet — covers Lecture 3 (Data Prep).
+"""Data-preparation pipeline on the yellow-taxi Parquet — covers Lecture 3.
 
-Walks through the core preprocessing operations every project hits before any
-modelling can start: missing-value inspection + imputation, IQR-based outlier
-detection, z-score normalization, equal-frequency binning, and one-hot encoding
-of a categorical column.
+Demonstrates the core preprocessing steps every project hits before modelling:
+missing-value inspection + imputation, IQR outlier detection, z-score
+normalization, equal-frequency binning, and one-hot encoding. (Larose's claim
+that data prep is ~60% of the effort — these are the operations it's made of.)
 
-Larose's "60% of effort is data prep" claim — this script demonstrates the
-actual operations that 60% is made of.
+Each numbered section computes a result and peeks at it; the asserts at the end
+verify the pipeline ran as expected.
 """
 import time
 
 from pyspark.sql import functions as F
 
 from constants import TAXI_PARQUET
-from spark_helper import get_spark, print_ui_urls, require_files
+from spark_helper import get_spark, print_ui_urls, require_files, show_step
 
 
 def main() -> None:
@@ -21,98 +21,68 @@ def main() -> None:
     spark = get_spark("cs675-taxi-data-prep")
     start = time.time()
 
-    df = spark.read.parquet(TAXI_PARQUET)                              # read Parquet fact table
+    df = spark.read.parquet(TAXI_PARQUET)
     total = df.count()
     print(f"Starting rows: {total:,}")
 
-    # ----- 1. Missing-value inspection -----------------------------------
-    print("\n--- Missing-value counts per column ---")
-    # F.col(c).isNull().cast("int") yields 0/1; sum over the column → null count.
+    # 1. Missing-value inspection. isNull().cast("int") is 0/1; summing gives the count.
     null_counts = df.select([
-        F.sum(F.col(c).isNull().cast("int")).alias(c)                  # null-count per column
+        F.sum(F.col(c).isNull().cast("int")).alias(c)
         for c in ["passenger_count", "trip_distance", "fare_amount", "RatecodeID"]
     ])
-    null_counts.show(truncate=False)                                    # action
+    show_step("Missing-value counts per column", null_counts)
 
-    # ----- 2. Imputation: fill missing passenger_count with the median ---
-    # approxQuantile returns a list of percentile estimates; [0.5] is the median.
+    # 2. Impute missing passenger_count with the median (approxQuantile -> [median]).
     median_passengers = df.approxQuantile("passenger_count", [0.5], 0.01)[0]
-    print(f"\nMedian passenger_count = {median_passengers}")
-    df = df.fillna({"passenger_count": median_passengers})              # fill with median
-    print("After fillna, passenger_count nulls:", df.filter(F.col("passenger_count").isNull()).count())
+    df = df.fillna({"passenger_count": median_passengers})
+    print(f"Imputed passenger_count nulls with median = {median_passengers}")
 
-    # ----- 3. Outlier detection via IQR rule -----------------------------
-    # IQR rule: a value is an outlier if it sits >1.5*IQR below Q1 or above Q3.
-    # More robust than the z-score rule when outliers exist (which they do here).
+    # 3. Outlier detection via the IQR rule (more robust than z-score when outliers exist).
     q1, q3 = df.approxQuantile("trip_distance", [0.25, 0.75], 0.01)
     iqr = q3 - q1
-    low_cutoff  = q1 - 1.5 * iqr
-    high_cutoff = q3 + 1.5 * iqr
-    print(f"\ntrip_distance quartiles: Q1={q1:.2f}  Q3={q3:.2f}  IQR={iqr:.2f}")
-    print(f"  outlier cutoffs: [{low_cutoff:.2f}, {high_cutoff:.2f}]")
-
-    df_with_flag = df.withColumn(                                       # flag (don't drop) outliers
+    low_cutoff, high_cutoff = q1 - 1.5 * iqr, q3 + 1.5 * iqr
+    df = df.withColumn(
         "is_distance_outlier",
-        (F.col("trip_distance") < low_cutoff) | (F.col("trip_distance") > high_cutoff)
+        (F.col("trip_distance") < low_cutoff) | (F.col("trip_distance") > high_cutoff),
     )
-    n_outliers = df_with_flag.filter(F.col("is_distance_outlier")).count()
-    print(f"  flagged {n_outliers:,} of {total:,} rows ({100 * n_outliers / total:.2f}%) as distance outliers")
+    n_outliers = df.filter(F.col("is_distance_outlier")).count()
+    print(f"\ntrip_distance: Q1={q1:.2f} Q3={q3:.2f} IQR={iqr:.2f} "
+          f"fence=[{low_cutoff:.2f}, {high_cutoff:.2f}] "
+          f"-> {n_outliers:,} outliers ({100 * n_outliers / total:.2f}%)")
 
-    # ----- 4. Z-score normalization of fare_amount -----------------------
-    # Z = (X - mean) / sd — puts the column on a comparable scale (mean 0, sd 1).
+    # 4. Z-score normalization of fare_amount: (X - mean) / sd -> mean 0, sd 1.
     stats = df.agg(
-        F.avg("fare_amount").alias("mean_fare"),
-        F.stddev("fare_amount").alias("sd_fare"),
-    ).collect()[0]                                                       # action: collect the one-row result
-    mean_fare, sd_fare = stats["mean_fare"], stats["sd_fare"]
-    print(f"\nfare_amount stats: mean={mean_fare:.2f}  sd={sd_fare:.2f}")
+        F.avg("fare_amount").alias("mean"),
+        F.stddev("fare_amount").alias("sd"),
+    ).first()
+    df = df.withColumn("fare_z", (F.col("fare_amount") - F.lit(stats["mean"])) / F.lit(stats["sd"]))
+    print(f"\nfare_amount mean={stats['mean']:.2f} sd={stats['sd']:.2f}")
+    show_step("Normalized fare (sample)", df.select("fare_amount", "fare_z"))
 
-    df_normalized = df.withColumn(
-        "fare_z",
-        (F.col("fare_amount") - F.lit(mean_fare)) / F.lit(sd_fare),     # derived: standardized fare
-    )
-
-    print("--- Sample of normalized fare (5 rows) ---")
-    df_normalized.select("fare_amount", "fare_z").limit(5).show(truncate=False)
-
-    # ----- 5. Equal-frequency binning of trip_distance --------------------
-    # Equal-frequency binning splits the data into buckets with the same row
-    # count each, so outliers don't drag the bin widths around (unlike equal-width).
-    # We pick the quartile boundaries explicitly so each bin holds ~25% of rows.
+    # 5. Equal-frequency binning of trip_distance using quartile boundaries
+    #    (each bin holds ~25% of rows, so outliers don't distort the widths).
     p25, p50, p75 = df.approxQuantile("trip_distance", [0.25, 0.5, 0.75], 0.01)
-    print(f"\nDistance bin boundaries (quartile-based): "
-          f"<{p25:.2f}, <{p50:.2f}, <{p75:.2f}, >=")
-
-    df_binned = df.withColumn(
+    df = df.withColumn(
         "distance_bin",
-        F.when(F.col("trip_distance") < p25, "Q1_short")                 # bottom 25%
+        F.when(F.col("trip_distance") < p25, "Q1_short")
          .when(F.col("trip_distance") < p50, "Q2_medium")
          .when(F.col("trip_distance") < p75, "Q3_long")
-         .otherwise("Q4_very_long"),                                     # top 25%
+         .otherwise("Q4_very_long"),
     )
+    show_step("Trip count per distance bin", df.groupBy("distance_bin").count().orderBy("distance_bin"))
 
-    print("--- Trip count per distance bin ---")
-    df_binned.groupBy("distance_bin").count().orderBy("distance_bin").show(truncate=False)
+    # 6. One-hot encoding of payment_type: k-1 flags, credit_card (1) as the reference.
+    for code, name in [(2, "cash"), (3, "no_charge"), (4, "dispute"), (5, "unknown"), (6, "voided")]:
+        df = df.withColumn(f"pay_{name}", (F.col("payment_type") == code).cast("int"))
+    show_step("One-hot encoding (sample)",
+              df.select("payment_type", "pay_cash", "pay_no_charge", "pay_dispute", "pay_unknown", "pay_voided"))
 
-    # ----- 6. One-hot encoding of payment_type ----------------------------
-    # k - 1 indicator columns for k categories (drop one as the reference).
-    # payment_type codes 1–6; we treat 1 (credit_card) as the reference.
-    df_onehot = (
-        df
-        .withColumn("pay_cash",      (F.col("payment_type") == 2).cast("int"))  # 0/1 flag
-        .withColumn("pay_no_charge", (F.col("payment_type") == 3).cast("int"))
-        .withColumn("pay_dispute",   (F.col("payment_type") == 4).cast("int"))
-        .withColumn("pay_unknown",   (F.col("payment_type") == 5).cast("int"))
-        .withColumn("pay_voided",    (F.col("payment_type") == 6).cast("int"))
-    )
+    # --- Verify ---
+    assert df.filter(F.col("passenger_count").isNull()).count() == 0   # imputation filled them
+    assert n_outliers > 0                                              # the 300K-mile trip and friends
+    assert "fare_z" in df.columns and "distance_bin" in df.columns
 
-    print("--- One-hot encoding sample (5 rows) ---")
-    df_onehot.select(
-        "payment_type", "pay_cash", "pay_no_charge",
-        "pay_dispute", "pay_unknown", "pay_voided",
-    ).limit(5).show(truncate=False)
-
-    print(f"\nData-prep pipeline complete in {time.time() - start:.2f}s.")
+    print(f"\nData-prep pipeline complete in {time.time() - start:.1f}s.")
     print_ui_urls()
     spark.stop()
 

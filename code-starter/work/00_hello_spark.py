@@ -1,57 +1,46 @@
-"""Step-by-step smoke test — a tour of SparkSession, DataFrame, and the basic ops.
+"""Smoke test and a first tour of the core DataFrame operations.
 
-We walk through each operation slowly and show the intermediate result so
-you can see exactly what each function does. If you already know SQL, the
-SQL equivalent is shown alongside each PySpark call. Later scripts (04+)
-start chaining operations together; that's idiomatic Spark, but it's much
-harder to read until you've done a few step-by-step walks.
+Run with `make hello` (Docker) or `python 00_hello_spark.py`. It builds a tiny
+DataFrame in memory, derives a column, filters it, and checks the result.
+
+The idea to take away: in Spark, transformations like withColumn() and filter()
+are *lazy* — they only describe a new DataFrame. Nothing runs until an *action*
+like show() or count() asks for a result.
+
+The body is grouped into three parts: build the data, peek at it (the only
+prints), then verify it (asserts — silent unless something is wrong).
 """
 import pyspark
 from pyspark.sql import functions as F
 
-from spark_helper import get_spark, print_ui_urls
-
-print(f"PySpark version: {pyspark.__version__}")
-
-# The SparkSession is the entry point to every Spark program.
-spark = get_spark("cs675-hello")
-print(f"Default parallelism: {spark.sparkContext.defaultParallelism}")
-print(f"Spark master:        {spark.sparkContext.master}")
-print_ui_urls()
+from spark_helper import get_spark, print_ui_urls, show_step
 
 
-print("\n>>> Step 1: Start with a plain Python list of tuples")
-data = [(i, i * i) for i in range(10)]
-print(f"Python data (first 3 of {len(data)}): {data[:3]}")
+def main() -> None:
+    spark = get_spark("cs675-hello")
+    sc = spark.sparkContext
+    print(f"PySpark {pyspark.__version__} on {sc.master} ({sc.defaultParallelism} cores)")
 
-print("\n>>> Step 2: Turn the list into a Spark DataFrame")
-print('PySpark: spark.createDataFrame(data, ["x", "x_squared"])')
-print("SQL    : CREATE TABLE df (x BIGINT, x_squared BIGINT); INSERT INTO df VALUES …;")
-df = spark.createDataFrame(data, ["x", "x_squared"])     # convert Python data into a Spark DataFrame
-print("Schema (PySpark's printSchema — same idea as SQL's DESCRIBE TABLE):")
-df.printSchema()                                          # printSchema: column names + types
-print("Contents:")
-df.show()                                                  # show: action — triggers compute and prints
+    # --- Build: a tiny DataFrame, then two lazy transformations ---
+    rows = [(i, i * i) for i in range(10)]               # plain Python: (x, x squared)
+    df = spark.createDataFrame(rows, ["x", "x_squared"])  # Python list -> DataFrame
+    cubed = df.withColumn("x_cubed", F.col("x") * F.col("x") * F.col("x"))  # add a derived column
+    big = cubed.filter(F.col("x") > 5)                    # keep only rows where x > 5
+
+    # --- Peek: actions that trigger the work and print each table ---
+    show_step("Base data", df)
+    show_step("After withColumn(x_cubed)", cubed)
+    show_step("After filter(x > 5)", big)
+
+    # --- Verify: asserts confirm behavior, printing nothing unless they fail ---
+    assert df.count() == 10
+    assert cubed.columns == ["x", "x_squared", "x_cubed"]
+    assert big.count() == 4                               # x in {6, 7, 8, 9}
+
+    print("\nSmoke test passed.")
+    print_ui_urls()
+    spark.stop()
 
 
-print("\n>>> Step 3: Add a derived column with withColumn()")
-print('PySpark: df.withColumn("x_cubed", F.col("x") * F.col("x") * F.col("x"))')
-print("SQL    : SELECT *, x * x * x AS x_cubed FROM df")
-df_cubed = df.withColumn("x_cubed", F.col("x") * F.col("x") * F.col("x"))    # add new column based on existing ones
-df_cubed.show()
-
-print("\n>>> Step 4: Filter rows with filter()")
-print('PySpark: df_cubed.filter(F.col("x") > 5)')
-print("SQL    : SELECT * FROM df_cubed WHERE x > 5")
-df_filtered = df_cubed.filter(F.col("x") > 5)             # keep rows where the predicate is true
-df_filtered.show()
-
-
-print("\n>>> Step 5: Count rows in the filtered DataFrame")
-print("PySpark: df_filtered.count()")
-print("SQL    : SELECT COUNT(*) FROM df_filtered")
-n = df_filtered.count()                                    # count: action — forces a full pass through the data
-print(f"Filtered row count: {n}")
-
-print("\nSmoke test passed.")
-spark.stop()
+if __name__ == "__main__":
+    main()

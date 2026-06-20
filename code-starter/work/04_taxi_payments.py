@@ -1,31 +1,15 @@
 """Payment-method analysis on the yellow-taxi Parquet:
-trip count, revenue, average ticket size, and credit-vs-cash by hour of day.
+trip count, revenue, average ticket by method, and credit-vs-cash by hour.
 """
 import time
 
 from pyspark.sql import functions as F
 
 from constants import TAXI_PARQUET
-from spark_helper import get_spark, print_ui_urls, require_files
+from spark_helper import get_spark, print_ui_urls, require_files, show_step
 
-
-# TLC payment_type codes (1–6); anything else is "other".
-PAYMENT_LABELS = {
-    1: "credit_card",
-    2: "cash",
-    3: "no_charge",
-    4: "dispute",
-    5: "unknown",
-    6: "voided",
-}
-
-
-def payment_label_col(code_col: str = "payment_type"):
-    """Build a CASE-WHEN chain that turns numeric payment codes into label strings."""
-    expr = F.lit("other")                                                # default arm: anything not matched below
-    for code, label in PAYMENT_LABELS.items():
-        expr = F.when(F.col(code_col) == code, label).otherwise(expr)   # stack when/otherwise
-    return expr
+# TLC payment_type codes; anything else falls through to "other".
+PAYMENT_LABELS = {1: "credit_card", 2: "cash", 3: "no_charge", 4: "dispute", 5: "unknown", 6: "voided"}
 
 
 def main() -> None:
@@ -33,39 +17,46 @@ def main() -> None:
     spark = get_spark("cs675-taxi-payments")
     start = time.time()
 
-    df = (
-        spark.read.parquet(TAXI_PARQUET)
-        .withColumn("payment_label", payment_label_col())                # derive readable label column
-    )
+    # Build a CASE-WHEN chain (numeric code -> readable label) and add it as a column.
+    label = F.lit("other")
+    for code, name in PAYMENT_LABELS.items():
+        label = F.when(F.col("payment_type") == code, name).otherwise(label)
+    df = spark.read.parquet(TAXI_PARQUET).withColumn("payment_label", label)
     total_rows = df.count()
 
-    print("--- Trip count, revenue, average ticket by payment method ---")
-    (
+    by_method = (
         df.groupBy("payment_label")
-        .agg(                                                             # multiple aggregates in one pass
+        .agg(
             F.count("*").alias("n_trips"),
             F.round(F.sum("total_amount"), 0).alias("revenue_usd"),
             F.round(F.avg("total_amount"), 2).alias("avg_total_usd"),
             F.round(F.avg("fare_amount"), 2).alias("avg_fare_usd"),
         )
-        .orderBy(F.col("n_trips").desc()).show(truncate=False)
+        .orderBy(F.col("n_trips").desc())
     )
 
-    print("--- Credit vs. cash share by hour ---")
-    (
-        df.filter(F.col("payment_label").isin("credit_card", "cash"))    # only the two big payment types
+    # pivot turns the two payment labels into their own columns, one row per hour.
+    by_hour = (
+        df.filter(F.col("payment_label").isin("credit_card", "cash"))
         .withColumn("hour", F.hour("tpep_pickup_datetime"))
-        .groupBy("hour")
-        .pivot("payment_label", ["credit_card", "cash"]).count()         # pivot: long → wide (one column per label)
-        .orderBy("hour").show(24, truncate=False)
+        .groupBy("hour").pivot("payment_label", ["credit_card", "cash"]).count()
+        .orderBy("hour")
     )
 
-    # Suspicious-row sanity check — refund-like trips.
+    # --- Peek ---
+    show_step("Trips, revenue, avg ticket by payment method", by_method)
+    show_step("Credit vs cash by hour", by_hour, n=24)
+
+    # Refund-like rows: negative totals.
     n_negative = df.filter(F.col("total_amount") < 0).count()
-    print(f"Trips with total_amount < 0 (likely refunds): "
+    print(f"\nTrips with total_amount < 0 (likely refunds): "
           f"{n_negative:,} of {total_rows:,} ({100 * n_negative / total_rows:.2f}%)")
 
-    print(f"\nDone in {time.time() - start:.2f}s.")
+    # --- Verify ---
+    assert total_rows > 0
+    assert by_method.count() > 0
+
+    print(f"\nDone in {time.time() - start:.1f}s.")
     print_ui_urls()
     spark.stop()
 

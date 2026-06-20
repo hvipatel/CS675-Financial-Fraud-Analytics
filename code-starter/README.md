@@ -27,6 +27,7 @@ code-starter/
     ├── practice.py               # self-contained practice (generates its own data) — python practice.py
     ├── 00_hello_spark.py         # smoke test                       — make hello
     ├── 01_word_count.py          # word count on Shakespeare text   — make analyze-shakespeare-data-use-case-a
+    ├── 01_word_count_parallel.py # same, in pure Python (no Spark)  — make analyze-shakespeare-data-use-case-b
     ├── 02_taxi_analysis.py       # cab trip overview                — make analyze-nyc-cab-data-use-case-a
     ├── 03_taxi_tipping.py        # cab tipping behavior             — make analyze-nyc-cab-data-use-case-b
     ├── 04_taxi_payments.py       # cab payment methods              — make analyze-nyc-cab-data-use-case-c

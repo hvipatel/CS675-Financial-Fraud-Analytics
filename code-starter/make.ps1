@@ -45,7 +45,8 @@ function Show-Help {
     Write-Host "Scripts 00-08 are numbered in rising order of complexity."
     Write-Host ""
     Write-Host "Analyses on Shakespeare text"
-    Write-Host "  .\make.ps1 analyze-shakespeare-data-use-case-a Word count (01_word_count.py)                       - MapReduce classic"
+    Write-Host "  .\make.ps1 analyze-shakespeare-data-use-case-a Word count, Spark    (01_word_count.py)          - MapReduce classic"
+    Write-Host "  .\make.ps1 analyze-shakespeare-data-use-case-b Word count, no Spark (01_word_count_parallel.py) - faster here; Spark is overkill at this size"
     Write-Host ""
     Write-Host "Analyses on NYC cab data (same Parquet, different questions)"
     Write-Host "  .\make.ps1 analyze-nyc-cab-data-use-case-a     Trip overview        (02_taxi_analysis.py)"
@@ -94,6 +95,7 @@ switch ($Target.ToLower()) {
     }
 
     "analyze-shakespeare-data-use-case-a" { docker compose exec pyspark python /home/jovyan/work/01_word_count.py }
+    "analyze-shakespeare-data-use-case-b" { docker compose exec pyspark python /home/jovyan/work/01_word_count_parallel.py }
     "analyze-nyc-cab-data-use-case-a"     { docker compose exec pyspark python /home/jovyan/work/02_taxi_analysis.py }
     "analyze-nyc-cab-data-use-case-b"     { docker compose exec pyspark python /home/jovyan/work/03_taxi_tipping.py }
     "analyze-nyc-cab-data-use-case-c"     { docker compose exec pyspark python /home/jovyan/work/04_taxi_payments.py }

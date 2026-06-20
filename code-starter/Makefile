@@ -7,7 +7,7 @@
 .PHONY: help up down restart logs shell hello test history clean \
         download-nyc-cab-data download-nyc-cab-zones-data download-nyc-bikes-data \
         download-shakespeare-data \
-        analyze-shakespeare-data-use-case-a \
+        analyze-shakespeare-data-use-case-a analyze-shakespeare-data-use-case-b \
         analyze-nyc-cab-data-use-case-a analyze-nyc-cab-data-use-case-b \
         analyze-nyc-cab-data-use-case-c analyze-nyc-cab-data-use-case-d \
         analyze-nyc-cab-data-use-case-e analyze-nyc-cab-data-use-case-f \
@@ -50,7 +50,8 @@ help:
 	@echo "Scripts 00–08 are numbered in rising order of complexity."
 	@echo ""
 	@echo "Analyses on Shakespeare text"
-	@echo "  make analyze-shakespeare-data-use-case-a Word count (01_word_count.py)                        — MapReduce classic"
+	@echo "  make analyze-shakespeare-data-use-case-a Word count, Spark        (01_word_count.py)          — MapReduce classic"
+	@echo "  make analyze-shakespeare-data-use-case-b Word count, no Spark     (01_word_count_parallel.py) — faster here; Spark is overkill at this size"
 	@echo ""
 	@echo "Analyses on NYC cab data (same Parquet, different questions)"
 	@echo "  make analyze-nyc-cab-data-use-case-a     Trip overview        (02_taxi_analysis.py)"
@@ -107,6 +108,9 @@ download-shakespeare-data:
 
 analyze-shakespeare-data-use-case-a:
 	docker compose exec pyspark python /home/jovyan/work/01_word_count.py
+
+analyze-shakespeare-data-use-case-b:
+	docker compose exec pyspark python /home/jovyan/work/01_word_count_parallel.py
 
 analyze-nyc-cab-data-use-case-a:
 	docker compose exec pyspark python /home/jovyan/work/02_taxi_analysis.py

@@ -1,0 +1,15 @@
+# Self-contained Terraform ignores, so this starter stays safe if copied out of
+# the course repo. Publish the CODE, never the state, secrets, or provider caches.
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+
+# Real variable files hold rosters / role ARNs - keep only the examples.
+terraform.tfvars
+*.tfvars
+!*.tfvars.example
+
+# Crash logs
+crash.log
+crash.*.log

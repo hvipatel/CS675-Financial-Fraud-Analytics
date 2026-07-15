@@ -59,7 +59,7 @@ Goal: strengthen the project with extra big-data capabilities for bonus credit.
 
 ## Score distribution
 
-Graded out of 100 points. Extensions add bonus points on top, capped at +10 (maximum total 110). Point values are proposed and may be adjusted.
+Graded out of 100 points. Extensions add bonus points on top, up to +20 (maximum total 120). This distribution is provisional and may be adjusted.
 
 **Required - 100 points**
 
@@ -77,14 +77,14 @@ Graded out of 100 points. Extensions add bonus points on top, capped at +10 (max
 | Final presentation and Q&A | 01 | 4 |
 | **Total** |  | **100** |
 
-**Optional extensions - bonus, up to +10 total (Step 02)**
+**Optional extensions - bonus, up to +20 total (Step 02)**
 
 | Extension | Points |
 |-----------|--------|
-| Machine learning model | 6 |
-| Terabyte-scale data | 4 |
-| Real-time ingestion | 4 |
-| User interface or dashboard | 2 |
+| Machine learning model | up to 20 |
+| Terabyte-scale data | up to 10 |
+| Real-time ingestion | up to 10 |
+| User interface or dashboard | up to 5 |
 
 ## Datasets
 

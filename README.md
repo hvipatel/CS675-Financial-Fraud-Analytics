@@ -1,58 +1,120 @@
 # Geospatial Credit Card Fraud Analytics Using Apache Spark and AWS
 
-This repository contains my CS-675 Final Project for Big Data Analytics at Cloud Scale.
+## CS-675 Final Project
+
+**Author:** Havi Patel
+
+---
 
 ## Project Overview
 
-The project analyzes 24,386,900 credit card transactions using Apache Spark and enriches them with U.S. Census ZIP Code data for geospatial fraud analysis.
+This repository contains my final project for **CS-675: Big Data Analytics at Cloud Scale**.
 
-The local Spark results were also validated in AWS using S3, Glue, and Athena.
+The project demonstrates how Apache Spark can be used to process and analyze large-scale financial transaction data efficiently. A dataset containing over **24 million** credit card transactions is analyzed to identify fraud patterns and generate business insights. The transaction data is enriched using U.S. Census ZIP Code Tabulation Area (ZCTA) data to support geospatial fraud analysis.
 
-## Technologies
+The project also demonstrates cloud-based analytics by validating Apache Spark results using **AWS S3**, **AWS Glue**, and **Amazon Athena**, with infrastructure provisioned through **Terraform**.
 
-- Apache Spark
-- PySpark
+---
+
+## Project Highlights
+
+- Processed **24,386,900** credit card transactions using Apache Spark
+- Performed distributed data processing and aggregation
+- Enriched transaction data with U.S. Census ZIP Code information
+- Analyzed fraud by:
+  - Payment method
+  - Merchant category (MCC)
+  - State
+  - ZIP Code
+  - Transaction amount
+- Validated Spark analytical results using Amazon Athena
+- Demonstrated cloud deployment using Infrastructure as Code (Terraform)
+
+---
+
+## Technologies Used
+
+- Apache Spark (PySpark)
 - Python
 - JupyterLab
 - Docker
 - AWS S3
-- AWS Glue
-- AWS Athena
+- AWS Glue Data Catalog
+- Amazon Athena
 - Terraform
+- Git & GitHub
+
+---
 
 ## Datasets
 
-1. IBM Credit Card Transactions  
-   - 24,386,900 transaction records
-   - Includes payment method, amount, merchant information, ZIP code, and fraud label
+### Dataset 1 — IBM Credit Card Transactions (Version 2)
 
-2. U.S. Census ZCTA Gazetteer  
-   - 33,791 ZIP Code Tabulation Areas
-   - Used for geographic enrichment
+- 24,386,900 transaction records
+- 15 transaction attributes
+- Includes fraud labels and merchant information
+
+### Dataset 2 — U.S. Census ZCTA Gazetteer
+
+- 33,791 ZIP Code Tabulation Areas
+- Used for geographic enrichment of transaction data
+
+---
 
 ## Key Results
 
-- Total transactions: 24,386,900
-- Fraudulent transactions: 29,757
-- Overall fraud rate: approximately 0.122%
-- Online transactions had the highest number of fraudulent transactions
-- Spark and Athena produced matching analytical results
-- Geographic enrichment matched approximately 87.02% of transaction records
+| Metric | Result |
+|---------|--------|
+| Total Transactions | 24,386,900 |
+| Fraudulent Transactions | 29,757 |
+| Fraud Rate | 0.122% |
+| ZIP Code Match Rate | Approximately 87.02% |
+
+---
 
 ## Repository Structure
 
 ```text
-code-starter/
-└── CS675_Financial_Fraud_Project/
-    ├── notebooks/
-    ├── src/
-    ├── docs/
-    ├── output/
-    └── README.md
+.
+├── README.md
+├── code-starter/
+│   ├── CS675_Financial_Fraud_Project/
+│   │   ├── README.md
+│   │   ├── notebooks/
+│   │   ├── src/
+│   │   ├── docs/
+│   │   ├── output/
+│   │   └── datasets/
+│   ├── docker-compose.yml
+│   ├── pyproject.toml
+│   └── uv.lock
+└── cloud-starter/
+    └── student-workspace/
+```
 
-cloud-starter/
-└── student-workspace/
-    └── Terraform configuration
+---
+
+## Project Documentation
+
+Detailed project documentation, implementation steps, setup instructions, and analytical results are available in:
+
+```text
+code-starter/CS675_Financial_Fraud_Project/README.md
+```
+
+---
+
+## Project Status
+
+**Status:** Completed !!
+
+This project successfully demonstrates scalable financial fraud analytics using Apache Spark and AWS cloud technologies.
+
+---
+
+## Acknowledgment
+
+This project was completed as part of the requirements for **CS-675: Big Data Analytics at Cloud Scale**.
 
 ###Link for the project: https://github.com/hvipatel/CS675-Financial-Fraud-Analytics/tree/main/code-starter
 

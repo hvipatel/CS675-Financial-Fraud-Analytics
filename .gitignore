@@ -1,0 +1,26 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Jupyter
+.ipynb_checkpoints/
+.virtual_documents/
+
+# Project data and generated outputs
+datasets/
+output/
+
+# Terraform
+.terraform/
+terraform.tfstate
+terraform.tfstate.*
+terraform.tfvars
+*.tfplan
+
+# AWS/local credentials
+.aws/
+.env

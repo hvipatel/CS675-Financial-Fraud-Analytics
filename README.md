@@ -1,9 +1,35 @@
-# CS-675 — Big Data Management
+# CS675 Final Project
+## Geospatial Credit Card Fraud Analytics Using Apache Spark and AWS
 
-Course materials for CS-675 (Big Data Management).
+This repository contains my final project for CS675: Big Data Analytics at Cloud Scale.
 
-Lab stack, Docker tutorial, and Git tutorial will be linked here once they're finalized for the semester.
+### Project Overview
+This project analyzes 24.4 million IBM credit card transactions using Apache Spark and enriches them with U.S. Census ZIP Code data for geospatial fraud analysis. The project also demonstrates cloud deployment using AWS S3, Glue, Athena, and Terraform.
 
-## Questions
+### Technologies
+- Apache Spark
+- Python
+- AWS S3
+- AWS Athena
+- AWS Glue
+- Terraform
+- Jupyter Notebook
 
-Bring them to office hours or post on the course site.
+### Repository Structure
+
+code-starter/CS675_Financial_Fraud_Project/
+- README.md
+- notebooks/
+- src/
+- docs/
+
+cloud-starter/student-workspace/
+- Terraform configuration
+- Athena queries
+- AWS deployment
+
+### Key Results
+- Processed 24,386,900 transactions
+- Fraud rate: 0.122%
+- Online transactions had the highest fraud rate
+- Spark and Athena produced matching analytical results

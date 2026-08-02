@@ -75,32 +75,44 @@ The project also demonstrates cloud-based analytics by validating Apache Spark r
 ## Repository Structure
 
 ```text
-.
-├── README.md
-├── code-starter/
-│   ├── CS675_Financial_Fraud_Project/
-│   │   ├── README.md
-│   │   ├── notebooks/
-│   │   ├── src/
-│   │   ├── docs/
-│   │   ├── output/
-│   │   └── datasets/
-│   ├── docker-compose.yml
-│   ├── pyproject.toml
-│   └── uv.lock
-└── cloud-starter/
-    └── student-workspace/
+CS675-Financial-Fraud-Analytics/
+│
+├── README.md                                    # Project overview
+│
+├── code-starter/                                # Apache Spark implementation
+│   └── CS675_Financial_Fraud_Project/
+│       ├── README.md                            # Project documentation
+│       ├── datasets/                            # IBM and Census datasets
+│       ├── notebooks/                           # Jupyter Notebook
+│       ├── src/                                 # Source code
+│       ├── output/                              # Analysis results
+│       └── docs/                                # Project documentation
+│
+├── cloud-starter/                               # AWS cloud deployment
+│   └── student-workspace/
+│       ├── 00-provider.tf
+│       ├── 01-variables.tf
+│       ├── 02-storage.tf
+│       ├── 03-athena.tf
+│       ├── 04-emr.tf
+│       ├── 05-notebook.tf
+│       ├── 06-outputs.tf
+│       ├── sql/                                 # Amazon Athena SQL queries
+│       └── run_query.sh
+│
+├── docs/
+│   └── AWS_Terraform_Deployment.md              # AWS infrastructure documentation
+│
+└── sql/                                         # Additional Athena SQL queries
 ```
-
 ---
+# Project Documentation
 
-## Project Documentation
+The repository includes detailed documentation covering the project implementation and AWS cloud deployment.
 
-Detailed project documentation, implementation steps, setup instructions, and analytical results are available in:
-
-```text
-code-starter/CS675_Financial_Fraud_Project/README.md
-```
+- **README.md** — Project overview
+- **code-starter/CS675_Financial_Fraud_Project/README.md** — Spark implementation
+- **docs/AWS_Terraform_Deployment.md** — AWS infrastructure, Terraform, Amazon S3, AWS Glue, and Amazon Athena
 
 ---
 
@@ -118,3 +130,27 @@ This project was completed as part of the requirements for **CS-675: Big Data An
 
 ###Link for the project: https://github.com/hvipatel/CS675-Financial-Fraud-Analytics/tree/main/code-starter
 
+
+---
+
+# Additional Documentation
+
+The repository includes additional technical documentation describing the cloud deployment and infrastructure used in this project.
+
+### AWS Infrastructure & Terraform Deployment
+
+The document below explains the AWS cloud architecture and deployment process used for this project:
+
+**docs/AWS_Terraform_Deployment.md**
+
+Topics covered include:
+
+- Terraform Infrastructure as Code (IaC)
+- Amazon S3 cloud storage
+- AWS Glue Data Catalog
+- Amazon Athena analytics
+- AWS deployment workflow
+- Infrastructure validation
+- Cloud architecture overview
+
+This documentation complements the Apache Spark implementation by explaining how the analytics pipeline was deployed and validated in AWS.
